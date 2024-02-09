@@ -43,8 +43,9 @@ def greedy_algorithm(stravy, suma):
     list_sorted_ratio = sorted(dict_key_and_ratio.items(), key=lambda x: x[1],
                                reverse=True)
     dict_sorted_ratio = dict(list_sorted_ratio)
-    # Роздрукуємо найменування страв з їх пріорітетами
-    print(dict_sorted_ratio)
+    # Роздрукуємо найменування страв з їх пріорітетами по співвідношенню
+    print("Страви відсортовані за співвідношенням калорійності та ціні",
+          dict_sorted_ratio)
     # Відберемо страви жадібним алгоритмом за відношенням калорій до вартості
     spysok_strav = {}
     for key, value in dict_sorted_ratio.items():
@@ -59,28 +60,28 @@ def greedy_algorithm(stravy, suma):
 
 
 def dynamic_programming(stravy, suma):
-    dict_key_and_ratio = {}
-    # Порахуємо відношення калорій до вартості для страв та додамо в словник
+    dict_key_and_kkal = {}
+    # Зробимо словник з сортуванням страв за калорійністю
     for key, value in stravy.items():
         ratio = 0
         for inner_key, inner_value in value.items():
             if ratio == 0:
-                ratio = inner_value
+                ratio = 1
             else:
-                # Та створимо словник з цими даними
-                ratio = inner_value/ratio
-                dict_key_and_ratio[key] = ratio
+                dict_key_and_kkal[key] = inner_value
                 ratio = 0
-    # Зробимо сортування за спаданням по співвідношенню калорій до вартості
-    list_sorted_ratio = sorted(dict_key_and_ratio.items(), key=lambda x: x[1],
+    # Зробимо сортування за спаданням калорійності
+    list_sorted_kkal = sorted(dict_key_and_kkal.items(), key=lambda x: x[1],
                                reverse=True)
-    dict_sorted_ratio = dict(list_sorted_ratio)
+    dict_sorted_kkal = dict(list_sorted_kkal)
+    # Роздрукуємо найменування страв за їх калорійністю
+    print("Страви відсортовані за калорійністю", dict_sorted_kkal)
     # Відберемо страви алгоритмом динамічного програмування
     spysok_strav = {}
     min_strav_req = [0] + [float("inf")] * suma
     last_strava_usage = [0] * (suma + 1)
     for s in range(1, suma + 1):
-        for key, value in dict_sorted_ratio.items():
+        for key, value in dict_sorted_kkal.items():
             current_strava = stravy[key]
             cost = current_strava.get("cost")
             if s >= cost and min_strav_req[s - cost] + 1 < min_strav_req[s]:
@@ -88,7 +89,6 @@ def dynamic_programming(stravy, suma):
                 last_strava_usage[s] = cost
     current_sum = suma
     while current_sum > 0:
-        #cost = last_strava_usage[current_sum]
         spysok_strav[key] = spysok_strav.get(key, 0) + 1
         current_sum = current_sum - cost
     return spysok_strav
