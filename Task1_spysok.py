@@ -1,16 +1,3 @@
-"""
-Для реалізації однозв'язного списку (приклад реалізації можна взяти
-з конспекту) необхідно:
-
-написати функцію, яка реалізує реверсування однозв'язного списку,
-змінюючи посилання між вузлами;
-розробити алгоритм сортування для однозв'язного списку, наприклад,
-сортування вставками або злиттям;
-написати функцію, що об'єднує два відсортовані однозв'язні списки
-в один відсортований список.
-"""
-
-
 from queue import Queue
 
 
@@ -96,51 +83,38 @@ class LinkedList:
         cur.next = q.get()
         self.head = q.get()
 
-    def sort_list(self):
-        length = 0
+    def insertion_sort(self):
+        if not self.head or not self.head.next:
+            return
+
+        sorted_list = LinkedList()
         cur = self.head
-        
+
         while cur:
-            length += 1
+            next_node = cur.next
+            sorted_list.insert_sorted(cur)
+            cur = next_node
+
+        self.head = sorted_list.head
+
+    def insert_sorted(self, new_node):
+        if not self.head or self.head.data >= new_node.data:
+            new_node.next = self.head
+            self.head = new_node
+        else:
+            cur = self.head
+            while cur.next and cur.next.data < new_node.data:
+                cur = cur.next
+            new_node.next = cur.next
+            cur.next = new_node
+
+    def merge_sorted_lists(llist_1, llist_2):
+        cur = llist_1.head
+        while cur.next:
             cur = cur.next
-        
-        cur = self.head
-        for i in range(1, length):
-            # key = lst[i]
-            # j = i-1
-            k = cur.next
-            k_data = k.data
-            j = cur
-            j_data = j.data
-            while j and k_data < j_data:
-                link_1 = j
-                link_2 = k
-                link_3 = k.next
-                cur = link_2
-                cur.next = link_1
-                cur.next.next = link_3
-                k = cur.next
-                k_data = k.data
-                j = cur
-                j_data = j.data
-
-# insert_after(self, prev_node: Node, data):
-
-                # j_data = j.data
-            # j.next.data = k.data
-            cur = cur.next
-            i += 1
-
-
-        
-    #     while j >=0 and key < lst[j] :
-    #             lst[j+1] = lst[j]
-    #             j -= 1
-    #     lst[j+1] = key 
-    # return lst
-
-    def merge_list(list_1, list_2):
-        pass
+        cur.next = llist_2.head
+        llist_1.insertion_sort()
+        return llist_1
 
 
 if __name__ == "__main__":
@@ -165,7 +139,7 @@ if __name__ == "__main__":
 
     # Зобимо реверс списку і роздрукуємо результати до та після
     print("Зв'язний список 1:")
-    llist1.print_list()
+    #llist1.print_list()
     # llist1.reverse_list()
     # print("Зв'язний список 1 після реверсу:")
     # llist1.print_list()
@@ -173,7 +147,11 @@ if __name__ == "__main__":
     # llist2.print_list()
     # llist2.reverse_list()
     # print("Зв'язний список 2 після реверсу:")
-    # llist2.print_list()
-    print("Відсортований зв'язний список 1:")
-    llist1.sort_list()
+    llist2.print_list()
+    # print("Відсортований зв'язний список 1:")
+    llist2.insertion_sort()
+    #llist1.merge_sort_list()
+    #llist1.print_list()
+    llist2.print_list()
+    llist1.merge_sorted_lists(llist2)
     llist1.print_list()
