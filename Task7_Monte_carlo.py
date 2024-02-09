@@ -14,6 +14,7 @@ for _ in range(nums):
 # Відсортуємо і виведемо отримані резульати у таблиці так на графіку
 probabilities = {key: count / nums for key, count in counts.items()}
 ordered_probabilities = dict(sorted(probabilities.items()))
+print("Імовірності випадіння кожної суми від 2 до 12 на двох кубиках: ")
 print(ordered_probabilities)
 print("Dice | Probability")
 print("-----|------------")

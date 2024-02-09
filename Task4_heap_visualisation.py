@@ -1,4 +1,5 @@
 import uuid
+import heapq
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -47,14 +48,19 @@ def draw_heap(heap_root):
     plt.show()
 
 
-# Створення купи
-root = Node(90)
-root.left = Node(78)
-root.left.left = Node(77)
-root.left.right = Node(6)
-root.right = Node(42)
-root.right.left = Node(8)
-root.right.right = Node(1)
+def build_binary_heap(heap, i=0):
+    if i < len(heap):
+        node = Node(heap[i])
+        node.left = build_binary_heap(heap, 2 * i + 1)
+        node.right = build_binary_heap(heap, 2 * i + 2)
+        return node
 
-# Відображення купи
-draw_heap(root)
+
+if __name__ == "__main__":
+    # Побудуємо мінімальну купу
+    numbers_heap = [90, 78, 77, 6, 42, 8, 1]
+    heapq.heapify(numbers_heap)
+    root = build_binary_heap(numbers_heap)
+
+    # Зробимо відображення купи
+    draw_heap(root)

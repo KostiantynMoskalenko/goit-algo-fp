@@ -1,101 +1,102 @@
 import uuid
-
 import networkx as nx
 import matplotlib.pyplot as plt
 
 
 class Node:
-    def __init__(self, key, color="#AAFF55"):
+    def __init__(self, key):
         self.left = None
         self.right = None
         self.val = key
-        self.color = color  # Додатковий аргумент для зберігання кольору вузла
-        self.id = str(uuid.uuid4())  # Унікальний ідентифікатор для кожного вузла
+        # Унікальний ідентифікатор для кожного вузла
+        self.id = str(uuid.uuid4())
 
 
 def add_edges(graph, node, pos, x=0, y=0, layer=1):
     if node is not None:
-        graph.add_node(node.id, color=node.color, label=node.val)  # Використання id та збереження значення вузла
+        # Використання id та збереження значення вузла
+        graph.add_node(node.id, label=node.val)
         if node.left:
             graph.add_edge(node.id, node.left.id)
-            l = x - 1 / 2 ** layer
-            pos[node.left.id] = (l, y - 1)
-            l = add_edges(graph, node.left, pos, x=l, y=y - 1, layer=layer + 1)
+            e_left = x - 1 / 2 ** layer
+            pos[node.left.id] = (e_left, y - 1)
+            e_left = add_edges(graph, node.left, pos, x=e_left, y=y - 1,
+                               layer=layer + 1)
         if node.right:
             graph.add_edge(node.id, node.right.id)
-            r = x + 1 / 2 ** layer
-            pos[node.right.id] = (r, y - 1)
-            r = add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
+            e_right = x + 1 / 2 ** layer
+            pos[node.right.id] = (e_right, y - 1)
+            e_right = add_edges(graph, node.right, pos, x=e_right, y=y - 1,
+                                layer=layer + 1)
     return graph
 
 
-def draw_tree(tree_root):
+def depth_first_traversal(node, colors):
+    if node is None:
+        return
+    colors[node.id] = generate_color(len(colors))
+    depth_first_traversal(node.left, colors)
+    depth_first_traversal(node.right, colors)
+
+
+def breadth_first_traversal(node, colors):
+    queue = [node]
+    while queue:
+        current_node = queue.pop(0)
+        colors[current_node.id] = generate_color(len(colors))
+        if current_node.left:
+            queue.append(current_node.left)
+        if current_node.right:
+            queue.append(current_node.right)
+
+
+def generate_color(index):
+    base_color = 101010
+    base_color = base_color + index * 101010
+    color = "#" + str(base_color)
+    return color
+
+
+def draw_tree(tree_root, traversal_type):
     tree = nx.DiGraph()
     pos = {tree_root.id: (0, 0)}
     tree = add_edges(tree, tree_root, pos)
 
-    colors = [node[1]['color'] for node in tree.nodes(data=True)]
-    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)}  # Використовуйте значення вузла для міток
+    colors = {}
+    title = ''
+    if traversal_type == 'DFS':
+        depth_first_traversal(tree_root, colors)
+        title = "DFS, Depth-first search traversal"
+    elif traversal_type == 'BFS':
+        breadth_first_traversal(tree_root, colors)
+        title = "BFS, Breadth-first search traversal"
+    # Використання значення вузла для міток
+    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)}
 
-    plt.figure(figsize=(8, 5))
-    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
+    draw_colors = []
+    for key, _ in labels.items():
+        draw_colors.append(colors[key])
+
+    plt.figure(figsize=(8, 8))
+    plt.title(title)
+    nx.draw(tree, pos=pos, labels=labels, font_color="#AFEEEE",
+            font_weight="bold", font_size=19, arrows=False,
+            node_size=2500, node_color=draw_colors)
     plt.show()
 
 
-def draw_DFS(graph, tree_root):
-    visited = set()
-    # Використовуємо стек для зберігання вершин
-    stack = [tree_root]  
-    while stack:
-        # Вилучаємо вершину зі стеку
-        vertex = stack.pop()
-        if vertex not in visited:
-            tree = nx.DiGraph()
-            pos = {tree_root.id: (0, 0)}
-            tree = add_edges(tree, tree_root, pos)
+if __name__ == "__main__":
+    # Створюємо дерево
+    root = Node(90)
+    root.left = Node(78)
+    root.left.left = Node(77)
+    root.left.right = Node(6)
+    root.right = Node(42)
+    root.right.left = Node(8)
+    root.right.right = Node(1)
 
-            colors = [node[1]['color'] for node in tree.nodes(data=True)]
-            labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)}  # Використовуйте значення вузла для міток
+    # Зробимо обхід дерева в глибину з візуалізацією
+    draw_tree(root, 'DFS')
 
-            plt.figure(figsize=(8, 5))
-            nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
-            plt.show()
-            print(vertex, end=' ')
-            # Відвідуємо вершину
-            visited.add(vertex)
-            # Додаємо сусідні вершини до стеку
-            stack.extend(reversed(graph[vertex]))
-
-
-
-
-def draw_BFS(graph, tree_root):
-    pass
-
-
-# Створення дерева
-root = Node(0)
-root.left = Node(4)
-root.left.left = Node(5)
-root.left.right = Node(10)
-root.right = Node(1)
-root.right.left = Node(3)
-
-# Відображення дерева
-draw_tree(root)
-
-# Формуємо граф для DFS та BFS
-graph = {
-    'A': ['B', 'C'],
-    'B': ['A', 'D', 'E'],
-    'C': ['A', 'F'],
-    'D': ['B'],
-    'E': ['B'],
-    'F': ['C']
-}
-
-# Прохід DFS
-draw_DFS(graph, 'A')
-
-# Прохід BFS
-draw_BFS(graph, 'A')
+    # Зробимо обхід дерева в ширину з візуалізацією
+    draw_tree(root, 'BFS')
